@@ -2,12 +2,14 @@ import os
 import json
 from openai import OpenAI
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["POST"], allow_headers=["Content-Type"])
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 META_PROMPT = """You are an expert prompt engineer. Given a use case, produce a high-quality
@@ -24,7 +26,13 @@ Output schema:
 {
   "system_prompt": "<string>",
   "user_prompt": "<string>"
-}"""
+}
+
+- Avoid generic phrases like "You are an AI language model"
+- Be explicit about output format and expectations
+- Optimize for production-ready code
+
+"""
 
 
 class GenerateRequest(BaseModel):

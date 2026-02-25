@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt Generator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #111;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 48px 16px;
+    }
+
+    main {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    h1 { font-size: 1.4rem; font-weight: 600; }
+
+    label { font-size: 0.85rem; font-weight: 500; color: #444; margin-bottom: 6px; display: block; }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 0.95rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      resize: vertical;
+      min-height: 100px;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    textarea:focus { outline: 2px solid #111; outline-offset: 1px; }
+
+    button {
+      align-self: flex-start;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #333; }
+    button:disabled { background: #999; cursor: not-allowed; }
+
+    .output-block {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .card h2 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .card pre {
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.6;
+      font-family: inherit;
+    }
+
+    .error {
+      color: #c00;
+      font-size: 0.9rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Prompt Generator</h1>
+
+    <div>
+      <label for="use-case">Use case</label>
+      <textarea id="use-case" placeholder="e.g. summarize a PDF into bullet points"></textarea>
+    </div>
+
+    <button id="generate-btn">Generate Prompt</button>
+    <p class="error" id="error"></p>
+
+    <div class="output-block" id="output">
+      <div class="card">
+        <h2>System Prompt</h2>
+        <pre id="system-prompt"></pre>
+      </div>
+      <div class="card">
+        <h2>User Prompt</h2>
+        <pre id="user-prompt"></pre>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const btn = document.getElementById("generate-btn");
+    const useCaseEl = document.getElementById("use-case");
+    const outputEl = document.getElementById("output");
+    const systemEl = document.getElementById("system-prompt");
+    const userEl = document.getElementById("user-prompt");
+    const errorEl = document.getElementById("error");
+
+    btn.addEventListener("click", async () => {
+      const useCase = useCaseEl.value.trim();
+      if (!useCase) return;
+
+      btn.disabled = true;
+      btn.textContent = "Generating...";
+      errorEl.style.display = "none";
+      outputEl.style.display = "none";
+
+      try {
+        const res = await fetch("http://localhost:8000/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ use_case: useCase }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        systemEl.textContent = data.system_prompt;
+        userEl.textContent = data.user_prompt;
+        outputEl.style.display = "flex";
+      } catch (err) {
+        errorEl.textContent = `Error: ${err.message}`;
+        errorEl.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Generate Prompt";
+      }
+    });
+  </script>
+</body>
+</html>
