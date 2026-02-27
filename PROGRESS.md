@@ -39,15 +39,34 @@
 - Fixed native select/button height alignment cross-browser.
 - Refactored codebase: `main.py`, `prompts.py`, `index.html`, `app.js` cleanly separated.
 
-### Known issues
-- `required_output_structure` occasionally renders as raw dict strings.
-- No `Cmd+Enter` keyboard shortcut.
+### Known issues (resolved in next session)
+- `required_output_structure` occasionally renders as raw dict strings. ✓ fixed via `_to_str()`
+- No `Cmd+Enter` keyboard shortcut. ✓ fixed
 - History doesn't record which model was used.
-- No in-app iteration loop for the reviewer prompt.
+- No in-app iteration loop for the reviewer prompt. ✓ fixed
 - Frontend hardcodes `localhost:8000` — not deployable as-is.
 
 ### Plan
-- Fix `required_output_structure` dict rendering in backend.
-- Add `Cmd+Enter` to submit.
+- Store model used in session history.
+- Explore persistence layer (accounts, saved prompts) as path to monetisation.
+
+---
+
+## 2026-02-27 (evening)
+
+### Done
+- Added **prompt refinement loop** — user can iterate on generated prompts without leaving the app.
+  - New `POST /refine` endpoint: accepts current prompts + feedback, applies changes via `REFINE_PROMPT`, returns updated prompts.
+  - `REFINE_PROMPT` preserves 5-section structure, applies only what feedback requests, prevents quality regression.
+  - Refine section appears below output after first generation (hidden until then).
+  - Iteration counter shows current refinement depth (e.g. "iteration 2").
+  - Refine input clears and page scrolls to top after each successful refinement.
+- Added **`Cmd+Enter` / `Ctrl+Enter`** keyboard shortcut — works for both generate and refine inputs.
+
+### Known issues
+- History doesn't record which model was used.
+- Frontend hardcodes `localhost:8000` — not deployable as-is.
+
+### Plan
 - Store model used in session history.
 - Explore persistence layer (accounts, saved prompts) as path to monetisation.

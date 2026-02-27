@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-from prompts import META_PROMPT, REVIEWER_PROMPT, REQUIRED_KEYS, build_system_prompt
+from prompts import META_PROMPT, REFINE_PROMPT, REVIEWER_PROMPT, REQUIRED_KEYS, build_system_prompt
 
 load_dotenv()
 
@@ -33,6 +33,13 @@ class GenerateResponse(BaseModel):
     system_prompt: str
     user_prompt: str
     reviewer_prompt: str
+
+
+class RefineRequest(BaseModel):
+    system_prompt: str
+    user_prompt: str
+    feedback: str
+    model: str = "gpt-4o-mini"
 
 
 def is_valid_use_case(text: str) -> bool:
@@ -79,6 +86,56 @@ def generate(req: GenerateRequest) -> GenerateResponse:
         raw = raw.lstrip("json").strip()
 
     # Skip any preamble before the JSON object
+    start = raw.find("{")
+    if start > 0:
+        raw = raw[start:]
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=502, detail=f"LLM returned invalid JSON: {raw}")
+
+    if not all(k in data for k in REQUIRED_KEYS):
+        raise HTTPException(status_code=502, detail=f"LLM response missing required keys: {data}")
+
+    return GenerateResponse(
+        system_prompt=build_system_prompt(data),
+        user_prompt=data["user_prompt"],
+        reviewer_prompt=REVIEWER_PROMPT,
+    )
+
+
+@app.post("/refine", response_model=GenerateResponse)
+def refine(req: RefineRequest) -> GenerateResponse:
+    if not req.feedback.strip():
+        raise HTTPException(status_code=422, detail="Feedback cannot be empty.")
+
+    if req.model not in ALLOWED_MODEL_IDS:
+        raise HTTPException(status_code=422, detail=f"Invalid model '{req.model}'.")
+
+    token_kwarg = "max_completion_tokens" if req.model.startswith("o") else "max_tokens"
+
+    user_content = (
+        f"Existing system prompt:\n{req.system_prompt}\n\n"
+        f"Existing user prompt:\n{req.user_prompt}\n\n"
+        f"Feedback:\n{req.feedback}"
+    )
+
+    response = client.chat.completions.create(
+        model=req.model,
+        **{token_kwarg: 8192},
+        messages=[
+            {"role": "system", "content": REFINE_PROMPT},
+            {"role": "user", "content": user_content},
+        ],
+    )
+
+    raw = response.choices[0].message.content.strip()
+
+    if "```" in raw:
+        raw = raw.split("```")[-2] if raw.count("```") >= 2 else raw
+        raw = raw.lstrip("json").strip()
+
     start = raw.find("{")
     if start > 0:
         raw = raw[start:]

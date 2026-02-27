@@ -152,6 +152,40 @@
 
     </section>
 
+    <!-- Refine -->
+    <section id="refine-section" class="hidden flex-col gap-2">
+      <div class="flex items-center justify-between">
+        <label for="refine-input" class="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8C8C88]">
+          Refine
+        </label>
+        <span id="iteration-badge" class="text-[11px] text-[#8C8C88]"></span>
+      </div>
+      <textarea
+        id="refine-input"
+        rows="3"
+        placeholder="e.g. add a section on observability, make the constraints stricter, focus on PostgreSQL"
+        class="w-full px-3.5 py-3 text-[14px] leading-relaxed bg-white border border-[#E4E4E2]
+               rounded-lg resize-y min-h-[72px] placeholder:text-[#C4C4C1]
+               focus:outline-none focus:border-[#AAAAA6] transition-colors"
+      ></textarea>
+      <div class="flex items-center gap-3">
+        <button
+          id="refine-btn"
+          style="height:38px;box-sizing:border-box;"
+          class="px-4 flex items-center bg-white hover:bg-[#F3F3F1] active:bg-[#E4E4E2]
+                 text-[#1A1A18] text-[14px] font-medium border border-[#E4E4E2] rounded-[7px]
+                 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          Refine Prompt
+        </button>
+      </div>
+      <div
+        id="refine-error"
+        class="hidden bg-[#FEF2F2] border border-[#FECACA] text-[#B91C1C]
+               text-[13px] rounded-lg px-3 py-2.5"
+      ></div>
+    </section>
+
     <!-- History -->
     <section id="history-section" class="hidden flex-col gap-3">
       <div class="flex items-center justify-between">

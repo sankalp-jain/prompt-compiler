@@ -81,6 +81,30 @@ OUTPUT RULES
 }
 """
 
+REFINE_PROMPT = """You are a prompt engineer. You are given an existing system prompt and user prompt, plus feedback from the user on what to improve.
+
+Your job: apply the feedback precisely and return an improved version of both prompts.
+
+Rules:
+- Preserve the five-section structure of the system prompt (Role & expertise, Task objective, Constraints & assumptions, Required output structure, Quality bar).
+- Apply only what the feedback explicitly requests. Do not change sections the feedback does not mention.
+- Do not weaken constraints, add hedging, or revert quality bar rules.
+- The user_prompt must remain self-contained and imperative.
+
+OUTPUT RULES
+- Valid JSON only. No markdown. No text outside the JSON object.
+- All six keys required. String values only. Escape newlines as \\n.
+
+{
+  "role_and_expertise": "...",
+  "user_prompt": "...",
+  "task_objective": "...",
+  "constraints_and_assumptions": "...",
+  "required_output_structure": "...",
+  "quality_bar": "..."
+}
+"""
+
 REVIEWER_PROMPT = (
     "Review the above response as a senior software architect.\n"
     "- Identify missing edge cases\n"

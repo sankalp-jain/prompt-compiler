@@ -1,12 +1,18 @@
 let currentData = {};
 let hasGenerated = false;
+let iterationCount = 0;
 
-const generateBtn  = document.getElementById("generate-btn");
-const useCaseEl    = document.getElementById("use-case");
-const modelSelect  = document.getElementById("model-select");
-const outputEl     = document.getElementById("output");
-const errorEl      = document.getElementById("error");
-const hintEl       = document.getElementById("hint");
+const generateBtn    = document.getElementById("generate-btn");
+const useCaseEl      = document.getElementById("use-case");
+const modelSelect    = document.getElementById("model-select");
+const outputEl       = document.getElementById("output");
+const errorEl        = document.getElementById("error");
+const hintEl         = document.getElementById("hint");
+const refineSectionEl = document.getElementById("refine-section");
+const refineBtn      = document.getElementById("refine-btn");
+const refineInputEl  = document.getElementById("refine-input");
+const refineErrorEl  = document.getElementById("refine-error");
+const iterationBadge = document.getElementById("iteration-badge");
 
 // ── Render ────────────────────────────────────────────────────────────────────
 
@@ -17,6 +23,12 @@ function renderResult(data) {
   document.getElementById("reviewer-prompt-body").textContent = data.reviewer_prompt;
   outputEl.classList.remove("hidden");
   outputEl.classList.add("flex");
+  refineSectionEl.classList.remove("hidden");
+  refineSectionEl.classList.add("flex");
+}
+
+function updateIterationBadge() {
+  iterationBadge.textContent = iterationCount > 0 ? `iteration ${iterationCount}` : "";
 }
 
 // ── Copy buttons ──────────────────────────────────────────────────────────────
@@ -119,6 +131,8 @@ generateBtn.addEventListener("click", async () => {
       hasGenerated = true;
     }
 
+    iterationCount = 0;
+    updateIterationBadge();
     renderResult(data);
     pushHistory({ use_case: useCase, ...data });
     renderHistory();
@@ -129,6 +143,61 @@ generateBtn.addEventListener("click", async () => {
   } finally {
     generateBtn.disabled    = false;
     generateBtn.textContent = "Generate Prompt";
+  }
+});
+
+// ── Refine ────────────────────────────────────────────────────────────────────
+
+refineBtn.addEventListener("click", async () => {
+  const feedback = refineInputEl.value.trim();
+  if (!feedback) return;
+
+  refineBtn.disabled    = true;
+  refineBtn.textContent = "Refining…";
+  refineErrorEl.classList.add("hidden");
+
+  try {
+    const res = await fetch("http://localhost:8000/refine", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_prompt: currentData.system_prompt,
+        user_prompt:   currentData.user_prompt,
+        feedback,
+        model: modelSelect.value,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error("Something went wrong. Please try again.");
+    }
+
+    iterationCount++;
+    updateIterationBadge();
+    renderResult(data);
+    refineInputEl.value = "";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+  } catch (err) {
+    refineErrorEl.textContent = err.message;
+    refineErrorEl.classList.remove("hidden");
+  } finally {
+    refineBtn.disabled    = false;
+    refineBtn.textContent = "Refine Prompt";
+  }
+});
+
+// ── Cmd+Enter ─────────────────────────────────────────────────────────────────
+
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+    if (document.activeElement === refineInputEl && refineInputEl.value.trim()) {
+      refineBtn.click();
+    } else if (useCaseEl.value.trim()) {
+      generateBtn.click();
+    }
   }
 });
 
