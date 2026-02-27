@@ -4,162 +4,168 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prompt Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f5f5f5;
-      color: #111;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 48px 16px;
-    }
-
-    main {
-      width: 100%;
-      max-width: 720px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    h1 { font-size: 1.4rem; font-weight: 600; }
-
-    label { font-size: 0.85rem; font-weight: 500; color: #444; margin-bottom: 6px; display: block; }
-
-    textarea {
-      width: 100%;
-      padding: 12px;
-      font-size: 0.95rem;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      resize: vertical;
-      min-height: 100px;
-      font-family: inherit;
-      background: #fff;
-    }
-
-    textarea:focus { outline: 2px solid #111; outline-offset: 1px; }
-
-    button {
-      align-self: flex-start;
-      padding: 10px 20px;
-      font-size: 0.95rem;
-      font-weight: 500;
-      background: #111;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    button:hover { background: #333; }
-    button:disabled { background: #999; cursor: not-allowed; }
-
-    .output-block {
-      display: none;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .card {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 16px;
-    }
-
-    .card h2 {
-      font-size: 0.8rem;
+    /* Markdown rendered inside system prompt body */
+    .prose-system h2 {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #666;
-      margin-bottom: 10px;
+      letter-spacing: 0.08em;
+      color: #1A1A18;
+      margin: 18px 0 5px;
     }
+    .prose-system h2:first-child { margin-top: 0; }
+    .prose-system p  { margin-bottom: 4px; }
+    .prose-system ul, .prose-system ol { padding-left: 18px; margin: 3px 0; }
+    .prose-system li { margin: 2px 0; }
 
-    .card pre {
-      font-size: 0.9rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.6;
-      font-family: inherit;
+    #model-select, #generate-btn {
+      height: 38px;
+      box-sizing: border-box;
     }
-
-    .error {
-      color: #c00;
-      font-size: 0.9rem;
-      display: none;
+    #model-select {
+      -webkit-appearance: none;
+      appearance: none;
+      padding: 0 28px 0 12px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238C8C88' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 9px center;
     }
   </style>
 </head>
-<body>
-  <main>
-    <h1>Prompt Generator</h1>
+<body class="bg-[#F7F7F6] text-[#1A1A18] min-h-screen pt-12 pb-20 px-4">
 
-    <div>
-      <label for="use-case">Use case</label>
-      <textarea id="use-case" placeholder="e.g. summarize a PDF into bullet points"></textarea>
-    </div>
+  <div class="max-w-[720px] mx-auto flex flex-col gap-8">
 
-    <button id="generate-btn">Generate Prompt</button>
-    <p class="error" id="error"></p>
+    <!-- Header -->
+    <header class="flex flex-col gap-1">
+      <h1 class="text-[1.1rem] font-semibold tracking-[-0.02em]">Prompt Generator</h1>
+      <p class="text-[13px] text-[#8C8C88]">Turn a use case into a structured LLM prompt.</p>
+    </header>
 
-    <div class="output-block" id="output">
-      <div class="card">
-        <h2>System Prompt</h2>
-        <pre id="system-prompt"></pre>
+    <!-- Input -->
+    <section class="flex flex-col gap-2">
+      <label for="use-case" class="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8C8C88]">
+        Use case
+      </label>
+      <textarea
+        id="use-case"
+        rows="4"
+        placeholder="e.g. design a rate limiter for a REST API"
+        class="w-full px-3.5 py-3 text-[14px] leading-relaxed bg-white border border-[#E4E4E2]
+               rounded-lg resize-y min-h-[88px] placeholder:text-[#C4C4C1]
+               focus:outline-none focus:border-[#AAAAA6] transition-colors"
+      ></textarea>
+      <p id="hint" class="text-[13px] text-[#8C8C88]">
+        Describe what you want to build or solve — e.g. design a rate limiter for a REST API
+      </p>
+      <div class="flex items-center gap-3 mt-1">
+        <select
+          id="model-select"
+          class="text-[14px] text-[#1A1A18] bg-white border border-[#E4E4E2]
+                 rounded-[7px] focus:outline-none focus:border-[#AAAAA6] transition-colors
+                 cursor-pointer"
+        ></select>
+        <button
+          id="generate-btn"
+          class="px-4 flex items-center bg-[#18181B] hover:bg-[#3A3A38] active:bg-[#0F0F0E]
+                 text-white text-[14px] font-medium rounded-[7px] disabled:opacity-40
+                 disabled:cursor-not-allowed transition-colors"
+        >
+          Generate Prompt
+        </button>
       </div>
-      <div class="card">
-        <h2>User Prompt</h2>
-        <pre id="user-prompt"></pre>
+      <div
+        id="error"
+        class="hidden bg-[#FEF2F2] border border-[#FECACA] text-[#B91C1C]
+               text-[13px] rounded-lg px-3 py-2.5 mt-1"
+      ></div>
+    </section>
+
+    <!-- Output -->
+    <section id="output" class="hidden flex-col gap-5">
+
+      <!-- System Prompt — primary, inverted header -->
+      <div class="border border-[#E4E4E2] rounded-lg overflow-hidden">
+        <div class="bg-[#18181B] px-4 py-2.5 flex items-center justify-between">
+          <span class="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/60">
+            System Prompt
+          </span>
+          <button
+            class="btn-copy text-[11px] font-medium text-white/50 border border-white/20
+                   rounded px-2 py-1 hover:text-white hover:border-white/40 transition-colors"
+            data-key="system_prompt"
+            data-variant="dark"
+          >Copy</button>
+        </div>
+        <div
+          id="system-prompt-body"
+          class="prose-system bg-[#F3F3F1] p-[18px] font-['JetBrains_Mono'] text-[13.5px]
+                 leading-[1.75] text-[#52524E]"
+        ></div>
       </div>
-    </div>
-  </main>
 
-  <script>
-    const btn = document.getElementById("generate-btn");
-    const useCaseEl = document.getElementById("use-case");
-    const outputEl = document.getElementById("output");
-    const systemEl = document.getElementById("system-prompt");
-    const userEl = document.getElementById("user-prompt");
-    const errorEl = document.getElementById("error");
+      <!-- User Prompt — secondary -->
+      <div class="border border-[#E4E4E2] rounded-lg overflow-hidden">
+        <div class="bg-[#FAFAF9] border-b border-[#E4E4E2] px-4 py-2.5 flex items-center justify-between">
+          <span class="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8C8C88]">
+            User Prompt
+          </span>
+          <button
+            class="btn-copy text-[11px] font-medium text-[#8C8C88] border border-[#E4E4E2]
+                   rounded px-2 py-1 hover:text-[#1A1A18] hover:border-[#BBBBB8] transition-colors"
+            data-key="user_prompt"
+          >Copy</button>
+        </div>
+        <pre
+          id="user-prompt-body"
+          class="bg-[#F3F3F1] p-[18px] font-['JetBrains_Mono'] text-[13.5px] leading-[1.75]
+                 text-[#52524E] whitespace-pre-wrap break-words"
+        ></pre>
+      </div>
 
-    btn.addEventListener("click", async () => {
-      const useCase = useCaseEl.value.trim();
-      if (!useCase) return;
+      <!-- Reviewer Prompt — supporting, dashed border -->
+      <div class="border border-dashed border-[#E4E4E2] rounded-lg overflow-hidden">
+        <div class="bg-[#FAFAF9] border-b border-dashed border-[#E4E4E2] px-4 py-2.5 flex items-center justify-between">
+          <span class="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8C8C88]">
+            Reviewer Prompt
+          </span>
+          <button
+            class="btn-copy text-[11px] font-medium text-[#8C8C88] border border-[#E4E4E2]
+                   rounded px-2 py-1 hover:text-[#1A1A18] hover:border-[#BBBBB8] transition-colors"
+            data-key="reviewer_prompt"
+          >Copy</button>
+        </div>
+        <pre
+          id="reviewer-prompt-body"
+          class="bg-[#F7F7F6] p-[18px] font-['JetBrains_Mono'] text-[13.5px] leading-[1.75]
+                 text-[#8C8C88] whitespace-pre-wrap break-words"
+        ></pre>
+      </div>
 
-      btn.disabled = true;
-      btn.textContent = "Generating...";
-      errorEl.style.display = "none";
-      outputEl.style.display = "none";
+    </section>
 
-      try {
-        const res = await fetch("http://localhost:8000/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ use_case: useCase }),
-        });
+    <!-- History -->
+    <section id="history-section" class="hidden flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <span class="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8C8C88]">History</span>
+        <button id="clear-btn" class="text-[13px] text-[#8C8C88] hover:text-[#B91C1C] transition-colors">
+          Clear
+        </button>
+      </div>
+      <div id="history-list" class="flex flex-col gap-1"></div>
+    </section>
 
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.detail || `HTTP ${res.status}`);
-        }
+  </div>
 
-        const data = await res.json();
-        systemEl.textContent = data.system_prompt;
-        userEl.textContent = data.user_prompt;
-        outputEl.style.display = "flex";
-      } catch (err) {
-        errorEl.textContent = `Error: ${err.message}`;
-        errorEl.style.display = "block";
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Generate Prompt";
-      }
-    });
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

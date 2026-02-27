@@ -21,3 +21,33 @@
 - Make output formatting more copy-friendly (clear sections, better spacing).
 - Test generated prompts against 3–5 different coding use cases to validate consistency.
 - Minor UI improvements only if they directly improve readability (no feature expansion).
+
+---
+
+## 2026-02-27
+
+### Done
+- Upgraded meta-prompt with intent summarisation step and enforced 5-section system prompt structure.
+- Added Reviewer Prompt (fixed senior architect checklist) as a third output.
+- Identified and fixed 6 meta-prompt failure cases (stack invention, weak objectives, non-constraining bullets, etc.).
+- Added input validation — rejects gibberish without an LLM call.
+- Added model selection dropdown: 6 OpenAI models, fetched dynamically from `GET /models`.
+- Measured real token usage (~1,245/query) and calculated per-query cost across all models.
+- Full UI redesign using Tailwind CDN + Inter + JetBrains Mono.
+- Three visually differentiated output cards (inverted header, standard, dashed border).
+- Markdown rendering, copy buttons, session history, user-facing error messages.
+- Fixed native select/button height alignment cross-browser.
+- Refactored codebase: `main.py`, `prompts.py`, `index.html`, `app.js` cleanly separated.
+
+### Known issues
+- `required_output_structure` occasionally renders as raw dict strings.
+- No `Cmd+Enter` keyboard shortcut.
+- History doesn't record which model was used.
+- No in-app iteration loop for the reviewer prompt.
+- Frontend hardcodes `localhost:8000` — not deployable as-is.
+
+### Plan
+- Fix `required_output_structure` dict rendering in backend.
+- Add `Cmd+Enter` to submit.
+- Store model used in session history.
+- Explore persistence layer (accounts, saved prompts) as path to monetisation.

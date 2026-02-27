@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tail:*)",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(open:*)",
+      "Bash(git add:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}
