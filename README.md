@@ -1,4 +1,4 @@
-# AI Prompt Generator
+# Prompt Compiler
 
 Turn a plain-English use case into a structured, production-ready LLM prompt.
 
