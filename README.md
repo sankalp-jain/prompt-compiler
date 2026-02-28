@@ -138,6 +138,22 @@ python3 test_pipeline.py
 
 The suite exits with a per-flow pass rate summary.
 
+## Prompt engineering techniques
+
+| Technique | Where applied | What it does |
+|---|---|---|
+| **Few-shot prompting** | `/generate` — meta-prompt | Domain-specific example (backend, frontend, data, DevOps, ML, general) is injected into the meta-prompt to calibrate output quality before the model writes a single field |
+| **Self-consistency** | `/generate` — step 2 | 3 candidates generated in parallel with the same prompt; variance across outputs exposes weak phrasings that a single call would lock in |
+| **LLM-as-Judge** | `/generate` — step 3 | A separate gpt-4.1-nano call scores all 3 candidates on 6 structured criteria and selects the best; removes human bias from candidate selection |
+| **APE (Automatic Prompt Engineer) heuristic** | `/generate` — judge fallback | Rule-based scorer (0–8) used when the judge call fails; scores role specificity, constraint density, quality bar completeness, and user prompt substance |
+| **Reflexion** | `/generate` — step 4 | The best candidate is critiqued and rewritten by a second LLM call at temperature=0.3; a scoring gate discards the reflected version if it regresses |
+| **Chain-of-thought (internal)** | Meta-prompt STEP 1 | Model is instructed to analyse goal, depth, and stack internally before writing any field; output of the analysis is never emitted |
+| **Schema-enforced output** | All generation calls | All LLM outputs are constrained to a fixed 6-key JSON schema; structure is validated in code, not trusted from model behaviour |
+| **Temperature control** | `/refine` | temperature=0.1 on refine calls enforces surgical edits — low temperature prevents the model from creatively rewriting fields it was not asked to change |
+| **Prompt chaining with state** | `/refine` | Raw JSON fields from the previous generate/refine are passed back verbatim on every refine call, so the model edits a structured object rather than reconstructing from rendered markdown |
+| **Refinement history** | `/refine` | All previous feedback instructions are appended to the refine prompt, preventing the model from reverting changes made in earlier iterations |
+| **Weakness-aware suggestions** | `/suggestions` | Identified weaknesses from the APE scorer are passed to the suggestions prompt, biasing at least 2 of 3 suggestions toward the actual gaps in the current prompt |
+
 ## Known limitations
 
 - Domain detection is keyword-based — ambiguous use cases may get a suboptimal few-shot example, though the model adapts regardless.
