@@ -115,6 +115,8 @@ Generate cost covers 5 LLM calls (3 candidates + judge + reflexion). The UI show
 
 `test_pipeline.py` is an end-to-end test suite that hits the live backend with real OpenAI calls. No mocks.
 
+> **Note:** The test suite is currently commented out. Uncomment `test_pipeline.py` before running.
+
 ```bash
 # Backend must be running on port 8000
 export OPENAI_API_KEY=sk-...
