@@ -297,6 +297,8 @@ async def generate(req: GenerateRequest) -> GenerateResponse:
     for r in raws:
         if isinstance(r, openai.AuthenticationError):
             raise HTTPException(status_code=401, detail="Invalid API key. Check your OpenAI key and try again.")
+        if isinstance(r, Exception):
+            pass
 
     # Step 2 — Parse all candidates
     parsed_candidates: list[dict] = []

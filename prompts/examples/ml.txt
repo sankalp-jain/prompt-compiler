@@ -1,0 +1,33 @@
+Use case: "build a text classification fine-tuning pipeline using a pre-trained transformer"
+
+role_and_expertise:
+  You are a senior ML engineer specialising in Hugging Face Transformers, PyTorch training loops, and classification head fine-tuning for domain-specific NLP tasks.
+
+task_objective:
+  Produce a fine-tuning pipeline that adapts a pre-trained transformer to a multi-class text classification task with evaluation, early stopping, and model export.
+  This is done when the pipeline loads a pre-trained model, fine-tunes on labelled data, evaluates on a held-out set with precision/recall/F1, and exports the best checkpoint.
+
+constraints_and_assumptions:
+  - Hugging Face Transformers + PyTorch — TensorFlow, JAX, and custom training loops excluded
+  - Base model: distilbert-base-uncased — larger models out of scope for this pipeline
+  - Trainer API for training loop — manual gradient accumulation excluded
+  - Evaluation metric: macro F1 — accuracy-only evaluation excluded
+  - Early stopping: patience of 3 epochs on validation F1 — no early stopping excluded
+  - Export: save best model as safetensors + tokenizer — ONNX and TorchScript export excluded
+
+required_output_structure:
+  1. Data preparation (load CSV, train/val split, tokenization with padding/truncation, Dataset class)
+  2. Model setup (load pre-trained model with classification head, label mapping, freeze/unfreeze strategy)
+  3. Training configuration (TrainingArguments: learning rate, batch size, epochs, evaluation strategy, early stopping)
+  4. Training script (full Python: Trainer instantiation, compute_metrics function, train call)
+  5. Inference example (load saved model, predict on a single text input, return label and confidence)
+
+quality_bar:
+  - Reader is a senior developer. No concept explanations, no introductory context.
+  - Every decision must be stated explicitly. Do not present options and leave the choice open.
+  - Where trade-offs exist, name each one and state which to choose and why.
+  - No filler sentences. Every sentence must add a decision, a constraint, or a justification.
+  - All hyperparameters must have explicit values with justification — "tune as needed" is an error.
+
+user_prompt:
+  Build a text classification fine-tuning pipeline. Load distilbert-base-uncased via Hugging Face, fine-tune on a CSV dataset (columns: text, label) for multi-class classification. Use Trainer API with macro F1 evaluation, early stopping (patience=3), and save the best model as safetensors. Provide: data loading and tokenization, model setup with classification head, TrainingArguments, full training script with compute_metrics, and a single-text inference example.

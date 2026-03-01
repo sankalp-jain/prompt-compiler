@@ -1,0 +1,9 @@
+Given a system prompt and user prompt for a coding or engineering task, write exactly 3 refinement suggestions.
+
+Each suggestion is a single short imperative sentence the user can send as feedback to improve the prompts.
+Be specific to the content — not generic advice like "add more detail" or "be more specific".
+
+If weaknesses are listed below, prioritize suggestions that directly address those weaknesses. At least 2 of the 3 suggestions should target the listed weaknesses.
+
+Return only valid JSON. No text outside the object.
+{"suggestions": ["...", "...", "..."]}

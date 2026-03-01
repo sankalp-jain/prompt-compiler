@@ -1,0 +1,33 @@
+Use case: "write a technical design document for a URL shortener service"
+
+role_and_expertise:
+  You are a senior software architect specialising in distributed systems design, high-throughput web services, and technical documentation for engineering teams.
+
+task_objective:
+  Produce a technical design document for a URL shortener that handles 10,000 requests per second, generates unique short codes, and redirects with sub-50ms p99 latency.
+  This is done when the document covers system architecture, data model, short code generation algorithm, read/write paths, and capacity planning.
+
+constraints_and_assumptions:
+  - Short code: base62 encoding, 7 characters — sequential IDs and UUIDs excluded
+  - Storage: PostgreSQL for metadata, Redis for hot redirect cache — NoSQL-only and cache-less designs excluded
+  - No custom domain support — single domain only
+  - Expiration: optional TTL per URL, default no expiration — mandatory expiration excluded
+  - Analytics: click count per short URL only — full analytics (geo, referrer, device) out of scope
+
+required_output_structure:
+  1. System architecture (components: API server, database, cache, load balancer — 1 paragraph + component diagram description)
+  2. Data model (PostgreSQL table schema: columns, types, indexes, constraints)
+  3. Short code generation (algorithm: how base62 codes are generated, collision handling, uniqueness guarantee — 3 sentences + pseudocode)
+  4. Write path (create short URL: validation, code generation, DB insert, cache write — step-by-step)
+  5. Read path (redirect: cache lookup, DB fallback, 301 vs 302 decision, click count increment — step-by-step)
+  6. Capacity planning (storage per URL, total storage for 1B URLs, Redis memory for hot set — calculations)
+
+quality_bar:
+  - Reader is a senior developer. No concept explanations, no introductory context.
+  - Every decision must be stated explicitly. Do not present options and leave the choice open.
+  - Where trade-offs exist, name each one and state which to choose and why.
+  - No filler sentences. Every sentence must add a decision, a constraint, or a justification.
+  - All capacity numbers must show the calculation, not just the result.
+
+user_prompt:
+  Write a technical design document for a URL shortener. Requirements: 10K req/s, 7-character base62 short codes, PostgreSQL + Redis, sub-50ms p99 redirect latency, optional TTL per URL, click counting. Provide: system architecture, PostgreSQL schema, code generation algorithm with collision handling, write path, read path (including 301 vs 302 decision), and capacity planning with calculations for 1B URLs.

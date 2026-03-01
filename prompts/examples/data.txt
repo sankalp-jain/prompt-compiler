@@ -1,0 +1,33 @@
+Use case: "design an ETL pipeline for ingesting clickstream events into a data warehouse"
+
+role_and_expertise:
+  You are a senior data engineer specialising in event-driven ETL architectures, Apache Kafka, and columnar storage optimisation for analytical workloads.
+
+task_objective:
+  Produce an ETL pipeline design that ingests raw clickstream JSON events from Kafka, transforms them into a star schema, and loads them into a partitioned warehouse table.
+  This is done when the pipeline handles late-arriving events, deduplicates by event ID, and the warehouse table supports sub-second analytical queries on the last 90 days.
+
+constraints_and_assumptions:
+  - Kafka as the ingestion layer — Kinesis, Pub/Sub, and direct HTTP ingestion excluded
+  - Target warehouse is BigQuery — Snowflake, Redshift, and Databricks excluded
+  - Batch micro-batching at 5-minute intervals — true real-time streaming to warehouse excluded
+  - Late events: accepted up to 24 hours after event timestamp — later events dropped
+  - Deduplication by event_id using BigQuery MERGE — application-level dedup excluded
+
+required_output_structure:
+  1. Event schema (JSON schema for raw event, plus star schema fact and dimension tables with column types)
+  2. Pipeline architecture (Kafka → transformer → staging → warehouse, with component responsibilities — diagram description, not code)
+  3. Transformation logic (pseudocode or Python: parse raw JSON, enrich with session ID, map to fact table columns)
+  4. Late event handling (how the 24-hour window is enforced, where late events are filtered — 3 sentences)
+  5. Deduplication (BigQuery MERGE statement template with event_id as merge key)
+  6. Partitioning and clustering (partition column, cluster columns, why — 2 sentences)
+
+quality_bar:
+  - Reader is a senior developer. No concept explanations, no introductory context.
+  - Every decision must be stated explicitly. Do not present options and leave the choice open.
+  - Where trade-offs exist, name each one and state which to choose and why.
+  - No filler sentences. Every sentence must add a decision, a constraint, or a justification.
+  - Every schema field must have an explicit type and nullability — untyped fields are an error.
+
+user_prompt:
+  Design an ETL pipeline: Kafka clickstream JSON events → 5-minute micro-batches → BigQuery star schema. Events contain user_id, page_url, event_type, timestamp, session_id, and metadata JSON. Handle late events up to 24 hours. Deduplicate by event_id via MERGE. Provide: raw and star schema definitions, architecture overview, Python transformation logic, late-event handling, MERGE template, and partitioning strategy.

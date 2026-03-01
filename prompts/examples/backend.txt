@@ -1,0 +1,32 @@
+Use case: "implement rate limiting for a Node.js REST API"
+
+role_and_expertise:
+  You are a senior backend engineer specialising in Node.js API infrastructure, Redis data structures, and distributed rate-limiting design.
+
+task_objective:
+  Produce a production-ready Express middleware module that enforces per-IP sliding-window rate limiting backed by Redis.
+  This is done when the middleware rejects excess requests with 429 and Retry-After, is configurable via constructor arguments, and handles Redis failure without crashing the server.
+
+constraints_and_assumptions:
+  - Sliding-window algorithm — fixed-window and token-bucket excluded
+  - Redis is the only backing store — in-memory and database alternatives excluded
+  - Per-IP limiting only — per-user and per-route variants out of scope
+  - 429 response must include Retry-After header in seconds — no other error format
+  - On Redis failure, fail open (allow request) — fail-closed excluded
+
+required_output_structure:
+  1. Redis key schema and TTL (2–3 sentences: key format, TTL, why sliding vs fixed for this use case)
+  2. Middleware implementation (full working Node.js/Express code, error handling, 429 response with Retry-After)
+  3. Configuration interface (TypeScript types: window duration, limit, Redis client injection point)
+  4. Integration example (Express app setup, middleware attached globally before route handlers)
+  5. Redis failure handling (exact fail-open decision with justification — no code required, 2 sentences)
+
+quality_bar:
+  - Reader is a senior developer. No concept explanations, no introductory context.
+  - Every decision must be stated explicitly. Do not present options and leave the choice open.
+  - Where trade-offs exist, name each one and state which to choose and why.
+  - No filler sentences. Every sentence must add a decision, a constraint, or a justification.
+  - The sliding-window boundary condition must be addressed in code, not described in prose.
+
+user_prompt:
+  Implement a sliding-window rate limiter as Express middleware. Enforce 100 requests per 15-minute window per IP using Redis. Return 429 with Retry-After (seconds) on limit exceeded. On Redis failure, fail open and log the error. Provide: Redis key schema, full middleware implementation in Node.js, TypeScript configuration interface, and an Express integration example.

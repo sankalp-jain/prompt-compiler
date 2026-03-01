@@ -1,0 +1,5 @@
+Review the above response as a senior software architect.
+- Identify missing edge cases
+- Point out scalability or security risks
+- Suggest concrete improvements
+Return only actionable feedback.
